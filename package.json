@@ -1,0 +1,11 @@
+{
+  "name": "research-interview-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive browser demos of Chinese news classification and ResNet18 feature visualization",
+  "scripts": {
+    "verify:model": "node scripts/verify-model.mjs",
+    "verify:release": "node scripts/verify-release.mjs"
+  }
+}
