@@ -1,16 +1,16 @@
 [
   {
     "family": "Noto Sans SC",
-    "bytes": 152688,
-    "glyphsRequested": 569,
+    "bytes": 166236,
+    "glyphsRequested": 623,
     "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/OFL.txt",
-    "source": "Google Fonts CSS2 text subset, retrieved 2026-09-25"
+    "source": "Google Fonts CSS2 text subset, retrieved 2026-09-26"
   },
   {
     "family": "Noto Serif SC",
-    "bytes": 196528,
-    "glyphsRequested": 569,
+    "bytes": 214392,
+    "glyphsRequested": 623,
     "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/OFL.txt",
-    "source": "Google Fonts CSS2 text subset, retrieved 2026-09-25"
+    "source": "Google Fonts CSS2 text subset, retrieved 2026-09-26"
   }
 ]

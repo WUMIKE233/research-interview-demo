@@ -10,7 +10,7 @@ function files(dir) {
 }
 const entries = files(root);
 const failures = [];
-const required = ['index.html', '.nojekyll', 'README.md', 'PROVENANCE.md', 'THIRD_PARTY.md', 'assets/app.js', 'assets/classifier.js', 'assets/style.css', 'assets/fonts/noto-sans-sc.woff2', 'assets/fonts/noto-serif-sc.woff2'];
+const required = ['index.html', '.nojekyll', 'README.md', 'PROVENANCE.md', 'THIRD_PARTY.md', 'assets/discussion.js', 'assets/topics.js', 'assets/discussion.css', 'assets/discussion-mark.svg', 'assets/fonts/noto-sans-sc.woff2', 'assets/fonts/noto-serif-sc.woff2'];
 for (const file of required) if (!fs.existsSync(path.join(root, file))) failures.push(`Missing ${file}`);
 for (const filename of entries.filter(x => /\.(?:html|js|mjs|css|md|json|py|txt)$/.test(x))) {
   const content = fs.readFileSync(filename, 'utf8');
@@ -23,7 +23,8 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 for (const match of html.matchAll(/(?:href|src)="(\.\/[^"#]+)"/g)) {
   if (!fs.existsSync(path.join(root, match[1]))) failures.push(`Broken HTML asset: ${match[1]}`);
 }
-const css = fs.readFileSync(path.join(root, 'assets/style.css'), 'utf8');
+if (/id="(?:nlp|vision|evidence|predict-button)"|src="\.\/assets\/app\.js"/.test(html)) failures.push('Legacy demo appears on the dialogue page');
+const css = fs.readFileSync(path.join(root, 'assets/discussion.css'), 'utf8');
 for (const match of css.matchAll(/url\('([^']+)'\)/g)) {
   if (!fs.existsSync(path.join(root, 'assets', match[1]))) failures.push(`Broken CSS asset: ${match[1]}`);
 }

@@ -1,4 +1,25 @@
-# 结果来源 / Result provenance
+# 来源与内容边界 / Sources and scope
+
+## 当前面谈页 / Current discussion page
+
+2026-09-26：主页改为同屏面谈工具。五个话题由用户已确认的面谈提纲整理，围绕研究方向、少样本搜索稳定性、SAM鲁棒性、受控评测和Agent过程安全。所有新实验均为讨论建议，没有生成或暗示新的论文实验结果；所列导师论文属于其作者，不属于网页整理者的个人成果。
+
+公开阅读入口：
+
+- [导师主页 / Research profile](https://jiahuan-long.github.io/jiahuan-long-academic/)
+- [学院介绍 / Institutional profile](https://ai.szu.edu.cn/info/1103/6510.htm)
+- [Parameter-Free Fine-tuning 作者代码 / Author repository](https://github.com/Jiahuan-Long/parameter-free-finetuning)
+- [Robust SAM 作者代码 / Author repository](https://github.com/Jiahuan-Long/RobustSAM)
+
+50张带标注搜索图像等背景描述来自用户提供的论文及已完成的阅读核查。网页没有上传这些PDF全文，也未将新的稳定性问题表述为论文已证实的缺陷。文本检测和Agent讨论只引用方法问题，不公开本地未发表手稿、评审文件或私人实验目录。
+
+The current page contains discussion prompts and proposed starting tasks, not new experimental findings. Faculty papers belong to their authors. No supplied PDF, private manuscript, review correspondence, or meeting note is included in the repository. Meeting notes stay in the visitor's browser unless the visitor explicitly exports and shares them.
+
+## 历史v1资源说明 / Historical v1 assets
+
+以下记录解释仓库中保留的早期项目资源。当前主页不引用或加载这些项目演示、模型和实验图。它们不是本次面谈页的研究成果或实时功能。
+
+The following evidence documents retained v1 resources. The current dialogue page neither references nor loads the original project demos, model parameters, or experiment images.
 
 核查日期 / Verified: 2026-09-25.
 
