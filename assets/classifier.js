@@ -51,20 +51,50 @@ export function createClassifier(metadata, vocabulary, buffer) {
   };
 }
 
-export async function loadClassifier(base = './assets/model/') {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 45000);
-  try {
-    const get = async (path, format) => {
-      const response = await fetch(base + path, { signal: controller.signal });
-      if (!response.ok) throw new Error('模型资源暂时无法加载，请稍后重试。');
-      return format === 'binary' ? response.arrayBuffer() : response.json();
+export async function loadClassifier(base = './assets/model/', onProgress = () => {}) {
+  const get = async (path, format, expectedBytes) => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const response = await fetch(base + path, { signal: AbortSignal.timeout(30000), cache: attempt ? 'reload' : 'default' });
+        if (!response.ok) throw new Error('模型资源暂时无法加载，请稍后重试。');
+        const result = format === 'binary' ? await response.arrayBuffer() : await response.json();
+        if (expectedBytes !== undefined && result.byteLength !== expectedBytes) throw new Error('模型分块传输不完整。');
+        return result;
+      } catch (error) {
+        if (attempt === 2) throw error;
+      }
+    }
+  };
+  const metadata = await get('metadata.json');
+  const vocabularyPromise = get('vocabulary.json');
+  let buffer;
+  if (metadata.delivery) {
+    const compressed = typeof DecompressionStream !== 'undefined';
+    const parts = compressed ? metadata.delivery.compressedParts : metadata.delivery.rawParts;
+    const chunks = new Array(parts.length);
+    let next = 0;
+    let completed = 0;
+    const worker = async () => {
+      while (next < parts.length) {
+        const index = next++;
+        const part = parts[index];
+        chunks[index] = await get(part.file, 'binary', part.bytes);
+        onProgress(++completed, parts.length);
+      }
     };
-    const [metadata, vocabulary, buffer] = await Promise.all([
-      get('metadata.json'), get('vocabulary.json'), get('weights.f32', 'binary'),
+    // Consume both promises together so a vocabulary failure is handled immediately.
+    const [vocabulary] = await Promise.all([
+      vocabularyPromise,
+      Promise.all(Array.from({ length: Math.min(3, parts.length) }, worker)),
     ]);
+    const blob = new Blob(chunks);
+    buffer = compressed ? await new Response(blob.stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer() : await blob.arrayBuffer();
+    if (globalThis.crypto?.subtle) {
+      const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', buffer))].map(x => x.toString(16).padStart(2, '0')).join('');
+      if (hash !== metadata.weightsSha256) throw new Error('模型完整性校验未通过，请重新加载。');
+    }
     return createClassifier(metadata, vocabulary, buffer);
-  } finally {
-    clearTimeout(timer);
   }
+  const [vocabulary, original] = await Promise.all([vocabularyPromise, get('weights.f32', 'binary')]);
+  return createClassifier(metadata, vocabulary, original);
 }

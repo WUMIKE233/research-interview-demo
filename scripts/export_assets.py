@@ -9,6 +9,7 @@ from pathlib import Path
 import argparse
 import csv
 import hashlib
+import gzip
 import json
 import re
 import shutil
@@ -62,6 +63,17 @@ intercept = np.asarray(classifier.intercept_, dtype='<f4')
 weights = np.concatenate([idf.ravel(), coef.ravel(), intercept.ravel()])
 weights.tofile(MODEL / 'weights.f32')
 write_json(MODEL / 'vocabulary.json', vocab)
+def split_payload(payload, prefix):
+    parts = []
+    for index, offset in enumerate(range(0, len(payload), 512 * 1024)):
+        chunk = payload[offset:offset + 512 * 1024]
+        filename = f'{prefix}-{index:02d}.bin'
+        (MODEL / filename).write_bytes(chunk)
+        parts.append({'file': filename, 'bytes': len(chunk), 'sha256': hashlib.sha256(chunk).hexdigest()})
+    return parts
+raw_bytes = (MODEL / 'weights.f32').read_bytes()
+raw_parts = split_payload(raw_bytes, 'weights-raw')
+compressed_parts = split_payload(gzip.compress(raw_bytes, compresslevel=9, mtime=0), 'weights-gzip')
 write_json(MODEL / 'metadata.json', {
     'schema': 1, 'name': '字符 n-gram SVM', 'modelId': 'char_ngram_svm',
     'classes': classes, 'featureCount': len(vocab), 'ngramRange': [2, 5],
@@ -70,6 +82,7 @@ write_json(MODEL / 'metadata.json', {
     'sourceSha256': model_hash, 'sklearnVersion': sklearn.__version__,
     'weightsSha256': digest(MODEL / 'weights.f32'), 'vocabularySha256': digest(MODEL / 'vocabulary.json'),
     'scoreMeaning': 'Uncalibrated LinearSVC decision score, not probability',
+    'delivery': {'chunkBytes': 512 * 1024, 'compressedParts': compressed_parts, 'rawParts': raw_parts},
 })
 
 with (args.nlp_root / 'reports/all_model_comparison.csv').open(encoding='utf-8-sig') as f:

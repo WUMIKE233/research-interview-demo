@@ -58,7 +58,9 @@ async function ensureModel() {
   $('#model-dot').className = 'status-dot loading';
   $('#retry-model').hidden = true;
   $('#predict-button').disabled = true;
-  modelPromise = loadClassifier().then(model => {
+  modelPromise = loadClassifier('./assets/model/', (loaded, total) => {
+    $('#model-status').textContent = `模型载入 ${Math.round(loaded / total * 100)}% · 首次访问请稍候`;
+  }).then(model => {
     classifier = model;
     $('#model-status').textContent = '模型已就绪 · 计算在浏览器内完成';
     $('#model-dot').className = 'status-dot';

@@ -34,6 +34,12 @@ for (const sample of vision.samples) {
   }
 }
 const metadata = JSON.parse(fs.readFileSync(path.join(root, 'assets/model/metadata.json'), 'utf8'));
+for (const part of [...metadata.delivery.compressedParts, ...metadata.delivery.rawParts]) {
+  const file = path.join(root, 'assets/model', part.file);
+  if (!fs.existsSync(file)) { failures.push(`Missing model part: ${part.file}`); continue; }
+  const bytes = fs.readFileSync(file);
+  if (bytes.length !== part.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== part.sha256) failures.push(`Invalid model part: ${part.file}`);
+}
 for (const [filename, expected] of [['weights.f32', metadata.weightsSha256], ['vocabulary.json', metadata.vocabularySha256]]) {
   const hash = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'assets/model', filename))).digest('hex');
   if (hash !== expected) failures.push(`Model hash mismatch: ${filename}`);
